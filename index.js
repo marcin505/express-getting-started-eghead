@@ -23,24 +23,17 @@ app.engine('hbs', engine.handlebars);
 app.set('views', './views');
 app.set('view engine', 'hbs');
 
+app.use('/profilepics', express.static('images'));
+
 app.get('/', (req, res) => {
   // res.send(buffer)
   res.render('index', {users })
 })
 
-app.get(/big.*/, (req, res, next) =>{
-  console.log('BIG USER ACCESS');
-  next();
-});
-
-app.get(/.*dog.*/, (req, res, next) =>{
-  console.log('DOGD GO WOOF');
-  next();
-})
-
 app.get('/:username', (req, res) => {
-  var username = req.params.username;
-  res.send(username);
+  const username = req.params.username;
+  res.render('user', {username });
+  // res.send(username);
 })
 
 var server = app.listen(3000, () => {
