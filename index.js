@@ -35,6 +35,11 @@ app.set('view engine', 'hbs')
 app.use('/profilepics', express.static('images'))
 app.use(bodyParser.urlencoded({ extended: true }))
 
+app.all('/:username', function(req, res, next) {
+  console.log(req.method, 'for', req.params.username);
+  next();
+});
+
 app.get('/favicon.ico', function (req, res) {
   res.end()
 })
@@ -53,20 +58,45 @@ app.get('/', function (req, res) {
   })
 })
 
-app.get('/:username', function (req, res) {
+function verifyUser (req, res, next) {
+  var fp = getUserFilePath(req.params.username)
+  fs.exists(fp, function (yes) {
+    if (yes) {
+      next()
+    } else {
+      // next('route');
+      res.redirect(`/error/${req.params.username}`);
+    }})
+  }
+
+app.get('*.json', function (req, res) {
+  res.download(`./users/${req.path}`, 'funny name.exe')
+});
+
+app.get('/:username',verifyUser, function (req, res) {
   var username = req.params.username
   var user = getUser(username)
   res.render('user', {
     user: user,
     address: user.location
   })
+});
+
+app.get('/error/:username', function (req, res) {
+  res.status(404).send(`No user name ${req.params.username} found`);
+});
+
+app.get(`/data/:username`, function (req, res) {
+  var username = req.params.username;
+  var user = getUser(username);
+  res.json(user);
 })
 
 app.put('/:username', function (req, res) {
   var username = req.params.username
   var user = getUser(username)
   user.location = req.body;
-  console.log(user);
+  // console.log(user);
   saveUser(username, user)
   res.sendStatus(200);
   res.end()
