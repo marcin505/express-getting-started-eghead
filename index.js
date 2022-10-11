@@ -5,8 +5,7 @@ const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
 const engines = require('consolidate')
-const helpers = require('./helpers')
-
+const JSONStream = require('JSONStream');
 const bodyParser = require('body-parser')
 
 app.engine('hbs', engines.handlebars)
@@ -50,6 +49,18 @@ app.get('*.json', function (req, res) {
   res.download(`./users/${req.path}`, 'funny-name.exe')
 });
 
+app.get('/users/by/:gender', function (req, res) {
+  const readable = fs.createReadStream('users.json');
+  const gender = req.params.gender;
+  readable
+    .pipe(JSONStream.parse('*', function (user) {
+      if (user.gender === gender) {
+        console.log(user);
+        return user.name};
+    }))
+    .pipe(JSONStream.stringify('[\n  ', ',\n  ', '\n]\n'))
+    .pipe(res)
+})
 
 app.get('/error/:username', function (req, res) {
   res.status(404).send(`No user name ${req.params.username} found`);
@@ -57,8 +68,8 @@ app.get('/error/:username', function (req, res) {
 
 app.get(`/data/:username`, function (req, res) {
   const username = req.params.username;
-  const user = helpers.getUser(username);
-  res.json(user);
+  const readable = fs.createReadStream(`./users/${username}.json`);
+  readable.pipe(res);
 })
 
 const userRouter = require('./username')
