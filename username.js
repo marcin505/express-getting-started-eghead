@@ -11,13 +11,19 @@ router.all('/', function (req, res, next) {
   next()
 })
 
-router.get('/', helpers.verifyUser, function (req, res) {
+// router.get('/', helpers.verifyUser, function (req, res) {
+router.get('/', function (req, res) {
   const username = req.params.username
   const user = helpers.getUser(username)
   res.render('user', {
     user: user,
     address: user.location
   })
+})
+
+router.use(function name(err, req, res, next) {
+    console.error(err.stack);
+    res.status(500).send('Something broke!');
 })
  
 router.get('/edit', function (req, res) {
