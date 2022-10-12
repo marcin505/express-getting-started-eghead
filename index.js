@@ -8,6 +8,7 @@ const engines = require('consolidate')
 const JSONStream = require('JSONStream');
 const bodyParser = require('body-parser')
 
+const mpdule = require('./db').User;
 app.engine('hbs', engines.handlebars)
 
 app.set('views', './views')
@@ -20,17 +21,9 @@ app.get('/favicon.ico', function (req, res) {
   res.end()
 })
 
-app.get('/', function (req, res) {
-  const users = []
-  fs.readdir('users', function (err, files) {
-    files.forEach(function (file) {
-      fs.readFile(path.join(__dirname, 'users', file), {encoding: 'utf8'}, function (err, data) {
-        const user = JSON.parse(data)
-        user.name.full = _.startCase(user.name.first + ' ' + user.name.last)
-        users.push(user)
-        if (users.length === files.length) res.render('index', {users: users})
-      })
-    })
+app.get('/', function (req, res) { 
+    User.find({}, function(error, users) {
+      res.render('index', {users})
   })
 })
 
@@ -73,6 +66,7 @@ app.get(`/data/:username`, function (req, res) {
 })
 
 const userRouter = require('./username')
+const { User } = require('./db')
 app.use('/:username', userRouter)
 
 const server = app.listen(3000, function () {

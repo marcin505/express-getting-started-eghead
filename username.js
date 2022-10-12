@@ -1,6 +1,7 @@
 const express = require('express')
 const helpers = require('./helpers')
 const fs = require('fs')
+const { User } = require('./db')
 
 const router = express.Router({
   mergeParams: true
@@ -14,10 +15,11 @@ router.all('/', function (req, res, next) {
 // router.get('/', helpers.verifyUser, function (req, res) {
 router.get('/', function (req, res) {
   const username = req.params.username
-  const user = helpers.getUser(username)
-  res.render('user', {
-    user: user,
-    address: user.location
+  User.findOne({username}, function(err, user){
+    res.render('user', {
+      user: user,
+      address: user.location
+    })
   })
 })
 
@@ -31,11 +33,10 @@ router.get('/edit', function (req, res) {
 })
 
 router.put('/', function (req, res) {
-  const username = req.params.username
-  const user = helpers.getUser(username)
-  user.location = req.body
-  helpers.saveUser(username, user)
-  res.end()
+  const username = req.params.username;
+  User.findOneAndUpdate({username}, {location: req.body}, function(err, user){
+    res.end()
+  })
 })
 
 router.delete('/', function (req, res) {
