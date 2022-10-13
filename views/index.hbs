@@ -26,7 +26,8 @@
   {{#each users as |user|}}
   <div>
     <img src="/profilepics/{{user.username}}_sm.jpg" alt="">
-    <a href="/{{user.username}}">{{user.username}}</a>
+    <a href="/{{user.username}}">{{user.name.full}}</a>
+    <div>{{user.username}}</div>
   </div>
   {{/each}}
 </body>

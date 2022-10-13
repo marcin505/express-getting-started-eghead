@@ -1,7 +1,8 @@
 var uri = 'mongodb+srv://marcin:H0Eza1vdu9GJwyH5@batcluster.xvblpv2.mongodb.net/egghead_users'
+const _ = require('lodash');
 
 
-var mongoose = require('mongoose')
+const  mongoose = require('mongoose')
 mongoose.connect(uri)
 
 var db = mongoose.connection
@@ -17,7 +18,6 @@ var userSchema = mongoose.Schema({
     title: String,
     first: String,
     last: String,
-    full: String
   },
   location: {
     street: String,
@@ -26,8 +26,15 @@ var userSchema = mongoose.Schema({
     zip: Number
   }
 })
-exports.User = mongoose.model('Users', userSchema)
 
-exports.User.find({},function(err, users) {
-    console.log(users);
-})
+userSchema.virtual('name.full').get(function () {
+  return _.startCase(this.name.first + ' ' + this.name.last);
+});
+
+userSchema.virtual('name.full').set(function (value) {
+  var bits = value.split(' ');
+  this.name.first = bits[0];
+  this.name.last = bits[1];
+});
+
+exports.User = mongoose.model('Users', userSchema);
